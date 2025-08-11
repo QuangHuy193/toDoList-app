@@ -1,0 +1,23 @@
+.header {
+  background-color: aqua;
+  padding: 24px;
+  margin-bottom: 40px;
+}
+
+.header-content {
+  color: #003366;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  margin: 0;
+}
+
+.header-login-btn {
+  background-color: #ff6600 !important;
+  border-color: #ff6600 !important;
+  color: #fff !important;
+  font-weight: bold;
+}
