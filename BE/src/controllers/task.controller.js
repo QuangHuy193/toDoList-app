@@ -125,7 +125,7 @@ exports.updateTaskStatus = (req, res) => {
         .json({ message: "Không tìm thấy task hoặc bạn không có quyền sửa" });
     }
 
-    return res.status(200).json({ message: "Cập nhật status thành công" });
+    return res.status(200).json({ message: "Cập nhật trạng thái thành công" });
   });
 };
 

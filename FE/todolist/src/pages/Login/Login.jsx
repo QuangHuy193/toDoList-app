@@ -1,4 +1,5 @@
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button } from "antd";
+
 import { useNavigate } from "react-router-dom";
 import HomeButton from "../../components/HomeButton/HomeButton";
 import { login } from "../../services/API/userApi";
@@ -49,7 +50,10 @@ function Login() {
           <Form.Item
             label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập mật khẩu!" },
+              { min: 8, message: "Mật khẩu phải từ 8 ký tự trở lên!" },
+            ]}
           >
             <Input.Password placeholder="Nhập mật khẩu" />
           </Form.Item>

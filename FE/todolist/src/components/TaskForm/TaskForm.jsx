@@ -1,8 +1,22 @@
-import { Form, Input, DatePicker, Button, message } from "antd";
-import { createTask } from "../../services/API/tasksApi";
+import { Form, Input, DatePicker, Button } from "antd";
+import { createTask, updateTask } from "../../services/API/tasksApi";
+import { showError, showSuccess } from "../../utils/toastService";
+import { useEffect } from "react";
+import dayjs from "dayjs";
 
-export default function TaskForm({ onSuccess }) {
+export default function TaskForm({ editingTask, onSuccess }) {
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (editingTask) {
+      form.setFieldsValue({
+        ...editingTask,
+        deadline: editingTask.deadline ? dayjs(editingTask.deadline) : null, // convert
+      });
+    } else {
+      form.resetFields(); // reset khi thêm mới
+    }
+  }, [editingTask]);
 
   const onFinish = async (values) => {
     try {
@@ -11,12 +25,19 @@ export default function TaskForm({ onSuccess }) {
         description: values.description,
         deadline: values.deadline.format("YYYY-MM-DD HH:mm:ss"),
       };
-      await createTask(payload);
-      message.success("Thêm task thành công!");
-      form.resetFields();
-      onSuccess(); // refresh list
+
+      if (editingTask) {
+        await updateTask(editingTask.id, payload);
+        showSuccess("Cập nhật task thành công!");     
+        onSuccess(); // refresh list
+      } else {
+        await createTask(payload);
+        showSuccess("Thêm task thành công!");
+        form.resetFields();
+        onSuccess(); // refresh list
+      }
     } catch (err) {
-      message.error(err.response?.data?.message || "Lỗi server");
+      showError(err.response?.data?.message || "Lỗi server");
     }
   };
 
@@ -47,7 +68,7 @@ export default function TaskForm({ onSuccess }) {
       </Form.Item>
 
       <Button type="primary" htmlType="submit">
-        Thêm Task
+        {editingTask ? "Cập nhật task" : "Thêm Task"}
       </Button>
     </Form>
   );

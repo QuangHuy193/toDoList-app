@@ -1,6 +1,6 @@
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 // đăng ký
 exports.register = (req, res) => {
@@ -45,38 +45,54 @@ exports.register = (req, res) => {
 
 // đăng nhập
 exports.login = (req, res) => {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ message: "Vui lòng nhập tên đăng nhập và mật khẩu" });
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ message: "Vui lòng nhập tên đăng nhập và mật khẩu" });
+  }
+
+  db.query(
+    "SELECT * FROM user WHERE username = ?",
+    [username],
+    async (err, results) => {
+      if (err)
+        return res.status(500).json({ message: "Lỗi server", error: err });
+
+      if (results.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Sai tên đăng nhập và mật khẩu" });
+      }
+
+      const user = results[0];
+      if (user.username !== username) {
+        return res
+          .status(400)
+          .json({ message: "Sai tên đăng nhập" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ message: "Sai tên mật khẩu" });
+      }
+
+      // Tạo token JWT
+      const token = jwt.sign(
+        { id: user.id, username: user.username },
+        process.env.JWT_SECRET || "mysecret",
+        { expiresIn: "1h" }
+      );
+
+      return res.json({
+        message: "Đăng nhập thành công",
+        token,
+      });
     }
-
-    db.query("SELECT * FROM user WHERE username = ?", [username], async (err, results) => {
-        if (err) return res.status(500).json({ message: "Lỗi server", error: err });
-
-        if (results.length === 0) {
-            return res.status(400).json({ message: "Sai tên đăng nhập và mật khẩu" });
-        }
-
-        const user = results[0];
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Sai tên đăng nhập và mật khẩu" });
-        }
-
-        // Tạo token JWT
-        const token = jwt.sign(
-            { id: user.id, username: user.username },
-            process.env.JWT_SECRET || "mysecret",
-            { expiresIn: "1h" }
-        );
-
-        return res.json({
-            message: "Đăng nhập thành công",
-            token
-        });
-    });
+  );
 };
 
 // lấy thông tin
@@ -96,4 +112,3 @@ exports.getUserInfo = (req, res) => {
     res.json({ user: results[0] });
   });
 };
-

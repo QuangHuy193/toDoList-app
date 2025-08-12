@@ -3,11 +3,8 @@ import { useNavigate } from "react-router-dom";
 import classNames from "classnames/bind";
 import styles from "./Register.module.scss";
 import HomeButton from "../../components/HomeButton/HomeButton";
-
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
 import { register } from "../../services/API/userApi";
+import { showError, showSuccess } from "../../utils/toastService";
 
 const cx = classNames.bind(styles);
 
@@ -16,13 +13,15 @@ function Register() {
 
   const onFinish = async (values) => {
     try {
-      const res = await register(values);
-      toast.success("Đăng ký thành công! đang chuyển hướng sang trang đăng nhập.");
+      await register(values);
+      showSuccess(
+        "Đăng ký thành công! đang chuyển hướng sang trang đăng nhập."
+      );
       setTimeout(() => {
         navigate("/login");
       }, 3000);
     } catch (err) {
-      toast.error(
+      showError(
         err.response?.data?.message || "Đăng ký thất bại, thử lại sau!"
       );
     }
@@ -47,7 +46,10 @@ function Register() {
           <Form.Item
             label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập mật khẩu!" },
+              { min: 8, message: "Mật khẩu phải từ 8 ký tự trở lên!" },
+            ]}
             hasFeedback
           >
             <Input.Password placeholder="Nhập mật khẩu" />
@@ -82,7 +84,6 @@ function Register() {
           </Form.Item>
         </Form>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 }
